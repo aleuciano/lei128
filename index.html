@@ -1,0 +1,1389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LOB PMTO - CHOA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .option-btn {
+            transition: all 0.3s ease;
+        }
+        .correct {
+            background-color: #22c55e !important; /* green-500 */
+            color: white !important;
+            border-color: #16a34a !important; /* green-600 */
+        }
+        .incorrect {
+            background-color: #ef4444 !important; /* red-500 */
+            color: white !important;
+            border-color: #dc2626 !important; /* red-600 */
+        }
+        .disabled-options .option-btn:not(.correct) {
+            opacity: 0.7;
+            background-color: #f3f4f6; /* gray-100 */
+            cursor: not-allowed;
+        }
+        .disabled-options .option-btn:not(.correct):hover {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-3xl">
+        
+        <!-- Cabeçalho do Quiz -->
+        <div class="border-b border-gray-200 p-6">
+            <h1 class="text-2xl font-bold text-gray-800 text-center">Questões LOB PMTO - Preparatório CHOA</h1>
+            <p class="text-sm text-gray-500 text-center mt-1">Foco: Art. 1º ao 39 (Lei Complementar nº 128/2021)</p>
+        </div>
+
+        <!-- Conteúdo do Quiz (Será preenchido pelo JS) -->
+        <div id="quiz-container" class="p-6 md:p-8">
+            <div id="question-header" class="mb-6">
+                <p id="progress-text" class="text-sm font-medium text-blue-600">Questão 1 de 101</p>
+                <h2 id="question-text" class="text-lg md:text-xl font-semibold text-gray-900 mt-2">Carregando questão...</h2>
+            </div>
+
+            <div id="options-container" class="space-y-3">
+                <!-- Opções serão inseridas aqui pelo JS -->
+            </div>
+
+            <div id="feedback-container" class="mt-6 hidden">
+                <h3 id="feedback-title" class="text-lg font-semibold"></h3>
+                <p id="feedback-justification" class="text-sm text-gray-700 mt-2"></p>
+            </div>
+
+            <div id="navigation-container" class="mt-8 flex justify-between items-center">
+                <span id="score-text" class="text-sm font-medium text-gray-700">Acertos: 0</span>
+                <button id="next-btn" class="bg-blue-600 text-white font-medium py-2 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 hidden">
+                    Próxima Questão
+                </button>
+            </div>
+        </div>
+
+        <!-- Tela Final (Resultados) -->
+        <div id="results-container" class="p-8 text-center hidden">
+            <h2 class="text-3xl font-bold text-gray-800">Quiz Concluído!</h2>
+            <p class="text-xl text-gray-600 mt-4">Sua pontuação final foi:</p>
+            <div id="final-score" class="text-6xl font-extrabold text-blue-600 my-6">
+                0 / 101
+            </div>
+            <p id="final-percentage" class="text-2xl font-semibold text-gray-700 mb-8"></p>
+            <button id="restart-btn" class="bg-blue-600 text-white font-medium py-3 px-8 rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                Reiniciar Quiz
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        const questions = [
+            // Questões extraídas dos arquivos do usuário (Art. 1-39)
+            {
+                article: "Art. 2º",
+                question: "De acordo com a Lei Complementar Nº 128/2021, compete à PMTO, marque a alternativa INCORRETA: (Questão adaptada ST ANGÉLICA)",
+                options: [
+                    "Planejar, organizar, dirigir, supervisionar, coordenar, controlar e executar as ações de polícia ostensiva e de preservação da ordem pública.",
+                    "Proceder, nos termos da lei, à apuração das infrações penais de competência da polícia judiciária militar;",
+                    "Atuar de maneira preventiva, repressiva ou dissuasiva em locais ou áreas específicas em que ocorra ou se presuma possível a perturbação da ordem pública;",
+                    "Realizar a guarda interna de estabelecimentos penais e as missões de segurança de dignitários em conformidade com a lei.",
+                    "Executar, com exclusividade, ressalvadas as missões peculiares às Forças Armadas, o policiamento ostensivo fardado para prevenção e repressão dos ilícitos penais."
+                ],
+                answer: "Realizar a guarda interna de estabelecimentos penais e as missões de segurança de dignitários em conformidade com a lei.",
+                justification: "INCORRETA. O Art. 2º, VIII, prevê a 'guarda EXTERNA' de estabelecimentos penais, e não a 'guarda interna'."
+            },
+            {
+                article: "Art. 2º",
+                question: "De acordo com a Lei Complementar Nº 128/2021, compete à PMTO, marque a alternativa ERRADA: (Questão adaptada ST MARINALVA)",
+                options: [
+                    "planejar, organizar, dirigir, supervisionar, coordenar, controlar e executar as ações de polícia ostensiva e de preservação da ordem pública;",
+                    "executar, com exclusividade, ressalvadas as missões peculiares às Forças Armadas, o policiamento ostensivo fardado para prevenção e repressão dos ilícitos penais;",
+                    "atuar de maneira preventiva, repressiva ou dissuasiva em locais ou áreas específicas em que ocorra ou se presuma possível a perturbação da ordem pública;",
+                    "exercer o policiamento ostensivo e a fiscalização de trânsito nas rodovias estaduais e, no limite de sua competência, nas vias urbanas e rurais;",
+                    "desempenhar, nos limites de sua competência, a polícia administrativa do meio ambiente, na fiscalização, constatação e autuação de infrações ambientais, sem precisar colaborar com os demais órgãos ambientais."
+                ],
+                answer: "desempenhar, nos limites de sua competência, a polícia administrativa do meio ambiente, na fiscalização, constatação e autuação de infrações ambientais, sem precisar colaborar com os demais órgãos ambientais.",
+                justification: "INCORRETA. O Art. 2º, V, estabelece que a PMTO deve '...e colaborar com os demais órgãos ambientais na proteção do meio ambiente;'"
+            },
+            {
+                article: "Art. 9º",
+                question: "De acordo com o Art. 9º, as unidades administrativas de direção compõem o Comando-Geral da Corporação. Assinale a alternativa que NÃO apresenta uma dessas unidades: (Questão adaptada ST MARINALVA)",
+                options: [
+                    "Comandante-Geral - CG e Chefe do Estado Maior - CHEM;",
+                    "Subchefe do Estado Maior - SCHEM;",
+                    "Corregedor-Geral - CORREG;",
+                    "Estado Maior Geral - EMG e Estado Maior Especial – EME;",
+                    "Gabinete do Comandante-Geral - GCG."
+                ],
+                answer: "Gabinete do Comandante-Geral - GCG.",
+                justification: "INCORRETA. O GCG (Gabinete do Comandante-Geral) é uma Unidade Administrativa de APOIO (Art. 18, I), e não de Direção (Art. 9º). Os Comandos de Policiamento - CP (Art. 9, VII) é que completam a lista de unidades de direção."
+            },
+            {
+                article: "Art. 10-14",
+                question: "De acordo com a Lei Complementar nº 128/2021, marque a alternativa correta: (Questão adaptada ST ÁQUILA)",
+                options: [
+                    "O Chefe do Estado Maior é escolhido e nomeado por ato do Comandante-Geral.",
+                    "A lei não diz que o Subchefe do Estado Maior é escolhido dentre os coronéis da ativa, mas sim dos coronéis QOPM da corporação.",
+                    "As Corregedorias locais estão vinculadas tecnicamente aos respectivos comandantes e funcionalmente à CORREG.",
+                    "O Corregedor-Geral é nomeado por ato do Chefe do Poder Executivo.",
+                    "Compete ao CHEM a função de Subcomandante-Geral, enquanto ao Comandante-Geral, Secretário de Estado, não figura função administrativa, apenas política."
+                ],
+                answer: "A lei não diz que o Subchefe do Estado Maior é escolhido dentre os coronéis da ativa, mas sim dos coronéis QOPM da corporação.",
+                justification: "CORRETA. O Art. 13 afirma 'dentre os Coronéis do QOPM da Corporação', não especificando 'da ativa', como faz para o CG (Art. 10) e o CHEM (Art. 11). (a) CHEM é nomeado pelo Gov. (Art. 11); (c) É o oposto: subordinadas aos Cmt e vinculadas à CORREG (Art. 14, §2º); (d) Corregedor é escolhido pelo CG (Art. 14); (e) O CG é o 'responsável superior pelo comando, pela administração e pelo emprego' (Art. 10)."
+            },
+            {
+                article: "Art. 4-13",
+                question: "Conforme A Lei de Organização Básica (LC nº 128/2021), julgue as alternativas (V/F) e marque a sequência correta: (Questão adaptada ST Márcia) \n I - A PMTO é estruturada em unidades administrativas de direção, de apoio, de execução e especiais; \n II - As unidades administrativas de direção realizam e assessoram a atividade-meio da Corporação; \n III - Compete ao Chefe do Estado Maior – CHEM a função de Subcomandante-Geral da PMTO. \n IV - O Corregedor-Geral é escolhido pelo CG e nomeado por ato do Chefe do Poder Executivo. \n V - Compete ao SCHEM substituir o CHEM e comandar as Seções do EMG e o EME.",
+                options: [
+                    "V, V, F, V, V",
+                    "F, F, V, F, F",
+                    "V, F, V, F, F",
+                    "V, F, F, F, F",
+                    "V, F, V, F, V"
+                ],
+                answer: "V, F, V, F, F",
+                justification: "I - Correto (Art. 4). II - Falso (Direção = comando/planejamento, Art. 5; Apoio = atividade-meio, Art. 6). III - Correto (Art. 12). IV - Falso (É apenas 'escolhido pelo Comandante-Geral', Art. 14, não há menção de nomeação pelo Governador). V - Falso (Compete 'coordenar', não 'comandar' as seções, Art. 13, P.Ú)."
+            },
+            {
+                article: "Art. 3-27",
+                question: "Considerando a LC nº 128/2021, analise as alternativas (V/F) e assinale a sequência correta: (Questão adaptada ST Daniela) \n I- A PMTO é subordinada diretamente ao Chefe do Poder Executivo; \n II- A PMTO é estruturada em *órgãos* administrativos de direção, de apoio e execução; \n III- As unidades de execução realizam as atividades-fim, *excetuando* as diretrizes das unidades de direção; \n IV- Os Colégios Militares são unidades Especiais subordinadas à Diretoria de Saúde e Promoção Social – DSPS; \n V- As unidades de Direção realizam o comando, o planejamento e a administração da corporação.",
+                options: [
+                    "V, V, F, F, V",
+                    "V, F, F, V, F",
+                    "V, F, F, F, V",
+                    "V, V, V, V, V",
+                    "F, V, V, F, F"
+                ],
+                answer: "V, F, F, F, V",
+                justification: "I - Correto (Art. 3). II - Falso (Art. 4 usa o termo 'unidades', não 'órgãos'). III - Falso (Art. 7 diz 'executando as diretrizes', não 'excetuando'). IV - Falso (Art. 27, P.Ú, subordina os CMTO à 'Diretoria de Programas Sociais da PMTO - DPS'). V - Correto (Art. 5)."
+            },
+            {
+                article: "Art. 16",
+                question: "Sobre as Diretorias do Estado Maior Especial – EME (Art. 16), relacione as colunas e assinale a alternativa correta: \n (1) DAL \n (2) DEIP \n (3) DGP \n (4) DOF \n (5) DSPS \n (6) DPS \n ( ) Responsável pela gestão profissional de militares e civis. \n ( ) Responsável pelo planejamento do ensino, instrução e pesquisa. \n ( ) Responsável pela administração financeira, orçamentária e contábil. \n ( ) Responsável pela gestão dos CMTO, PROERD e Corpo Musical. \n ( ) Responsável pelas atividades de suprimento, manutenção de material e obras. \n ( ) Responsável pelos serviços de saúde, JMCS e Capelania Militar.",
+                options: [
+                    "3, 2, 4, 6, 1, 5",
+                    "3, 2, 6, 4, 1, 5",
+                    "5, 1, 3, 6, 4, 2",
+                    "3, 4, 6, 2, 1, 5",
+                    "5, 1, 6, 3, 4, 2"
+                ],
+                answer: "3, 2, 4, 6, 1, 5",
+                justification: "A sequência correta das responsabilidades listadas é: DGP (3), DEIP (2), DOF (4), DPS (6), DAL (1), DSPS (5)."
+            },
+            {
+                article: "Art. 19/22",
+                question: "Conforme A Lei de Organização Básica (LC nº 128/2021), marque a alternativa INCORRETA: (Questão adaptada Turma B)",
+                options: [
+                    "As funções de Comando e Chefia das unidades de Direção e de Apoio são exclusivas do posto de Coronel ou Tenente-Coronel do QOPM.",
+                    "São unidades administrativas Especiais da PMTO os Colégios Militares do Estado do Tocantins - CMTO.",
+                    "A ASTEF, unidade de assessoramento direto ao Comandante-Geral, é responsável pelas providências referentes à defesa do patrimônio público.",
+                    "O Gabinete do Comandante-Geral será chefiado por um Tenente-Coronel da ativa, pertencente ao QOPM, indicado pelo Comandante-Geral.",
+                    "A AJUR é unidade administrativa de assessoramento direto e imediato ao Comandante-Geral da Corporação."
+                ],
+                answer: "O Gabinete do Comandante-Geral será chefiado por um Tenente-Coronel da ativa, pertencente ao QOPM, indicado pelo Comandante-Geral.",
+                justification: "INCORRETA. O Art. 19 (Redação nova) estabelece que o GCG será chefiado por um 'Tenente-Coronel OU Coronel' da ativa, pertencente ao QOPM. A alternativa restringe indevidamente a 'Tenente-Coronel'."
+            },
+            
+            // Início das Questões Novas (Art. 1-39)
+            {
+                article: "Art. 1º",
+                question: "Segundo o Art. 1º da LC 128/2021, a PMTO, instituição permanente, força auxiliar e reserva do Exército, é classificada como:",
+                options: [
+                    "Uma Autarquia de regime especial.",
+                    "Uma Fundação Pública.",
+                    "Uma Secretaria de Estado.",
+                    "Um Órgão diretamente subordinado à Secretaria de Segurança Pública.",
+                    "Uma Empresa Pública vinculada ao Governador."
+                ],
+                answer: "Uma Secretaria de Estado.",
+                justification: "Art. 1º: 'A Polícia Militar do Estado do Tocantins - PMTO, Secretaria de Estado, instituição permanente...'"
+            },
+            {
+                article: "Art. 2º",
+                question: "Conforme o Art. 2º, V, ao desempenhar a polícia administrativa do meio ambiente, a PMTO, além de fiscalizar, constatar e autuar, deve:",
+                options: [
+                    "Substituir os demais órgãos ambientais.",
+                    "Colaborar com os demais órgãos ambientais na proteção do meio ambiente.",
+                    "Aguardar provocação dos demais órgãos para atuar.",
+                    "Limitar-se a lavrar o auto de infração, sem colaborar com outros órgãos.",
+                    "Exercer o comando unificado das operações ambientais."
+                ],
+                answer: "Colaborar com os demais órgãos ambientais na proteção do meio ambiente.",
+                justification: "Art. 2º, V: '...e colaborar com os demais órgãos ambientais na proteção do meio ambiente;'"
+            },
+            {
+                article: "Art. 2º",
+                question: "Qual das seguintes competências NÃO está listada no Art. 2º da LOB da PMTO?",
+                options: [
+                    "Proceder à apuração das infrações penais de competência da polícia judiciária militar.",
+                    "Realizar a perícia criminal e os serviços de identificação civil e criminal no Estado.",
+                    "Realizar a guarda externa de estabelecimentos penais.",
+                    "Garantir o exercício do poder de polícia pelos Poderes e órgãos públicos do Estado.",
+                    "Efetuar o patrulhamento aéreo, portuário, fluvial e lacustre no âmbito de sua competência."
+                ],
+                answer: "Realizar a perícia criminal e os serviços de identificação civil e criminal no Estado.",
+                justification: "A perícia e a identificação (Art. 2º) não estão listadas como competências da PMTO na LOB. As demais opções estão nos incisos VI, VIII, IX e X."
+            },
+            {
+                article: "Art. 2º",
+                question: "O serviço de saúde planejado e executado pela PMTO (Art. 2º, XI) destina-se a qual público e é regulamentado por quem?",
+                options: [
+                    "Aos policiais militares e seus dependentes, conforme regulamentação do Comandante-Geral.",
+                    "Aos policiais militares, conforme regulamentação do Chefe do Poder Executivo.",
+                    "A toda a população, em apoio ao SUS, conforme regulamentação do Secretário de Saúde.",
+                    "Aos policiais militares e demais agentes de segurança, conforme regulamentação do Cmt-Geral.",
+                    "Aos policiais militares e seus dependentes, conforme regulamentação do Chefe do Poder Executivo."
+                ],
+                answer: "Aos policiais militares, conforme regulamentação do Chefe do Poder Executivo.",
+                justification: "Art. 2º, XI: '...no âmbito interno... dos policiais militares, conforme regulamentação do Chefe do Poder Executivo...'. (A DSPS - Art. 16, V - estende à promoção social de inativos, dependentes e pensionistas, mas a competência do Art. 2º, XI cita 'policiais militares')."
+            },
+            {
+                article: "Art. 3º",
+                question: "A quem a Polícia Militar do Estado do Tocantins - PMTO é subordinada diretamente? (Art. 3º)",
+                options: [
+                    "Ao Chefe do Poder Executivo.",
+                    "Ao Secretário de Estado da Segurança Pública.",
+                    "Ao Chefe do Estado Maior das Forças Armadas.",
+                    "Ao Comandante Militar do Planalto (Exército).",
+                    "Ao Tribunal de Justiça do Estado do Tocantins."
+                ],
+                answer: "Ao Chefe do Poder Executivo.",
+                justification: "Art. 3º: 'A Polícia Militar... é subordinada diretamente ao Chefe do Poder Executivo.'"
+            },
+            {
+                article: "Art. 6º",
+                question: "As unidades administrativas que realizam e assessoram a atividade-meio da Corporação, atuando em cumprimento às diretrizes das unidades de direção, são as de: (Art. 6º)",
+                options: [
+                    "Direção.",
+                    "Apoio.",
+                    "Execução.",
+                    "Especiais.",
+                    "Estratégicas."
+                ],
+                answer: "Apoio.",
+                justification: "Art. 6º: 'As unidades administrativas de apoio realizam e assessoram a atividade-meio da Corporação...'"
+            },
+            {
+                article: "Art. 7º",
+                question: "As unidades administrativas que realizam as atividades-fim da PMTO, executando as diretrizes das unidades de direção, são as de: (Art. 7º)",
+                options: [
+                    "Direção.",
+                    "Apoio.",
+                    "Execução.",
+                    "Especiais.",
+                    "Operacionais."
+                ],
+                answer: "Execução.",
+                justification: "Art. 7º: 'As unidades administrativas de execução realizam as atividades-fim da PMTO...'"
+            },
+            {
+                article: "Art. 8º",
+                question: "As unidades de direção são responsáveis, perante o Comandante-Geral, pelo: (Art. 8º)",
+                options: [
+                    "Planejamento tático e execução operacional.",
+                    "Planejamento estratégico da Corporação.",
+                    "Suprimento e manutenção de material.",
+                    "Execução das atividades-fim.",
+                    "Gestão de pessoal e finanças exclusivamente."
+                ],
+                answer: "Planejamento estratégico da Corporação.",
+                justification: "Art. 8º: 'As unidades de direção são responsáveis... pelo planejamento estratégico da Corporação...'"
+            },
+            {
+                article: "Art. 9º",
+                question: "Qual das seguintes unidades administrativas NÃO compõe o Comando-Geral da Corporação (Unidades de Direção)? (Art. 9º)",
+                options: [
+                    "Chefe do Estado Maior - CHEM.",
+                    "Corregedor-Geral - CORREG.",
+                    "Estado Maior Especial - EME.",
+                    "Comandos de Policiamento - CP.",
+                    "Academia Policial Militar Tiradentes - APMT."
+                ],
+                answer: "Academia Policial Militar Tiradentes - APMT.",
+                justification: "O Art. 9º lista as Unidades de Direção. A APMT é uma Unidade de Apoio (Art. 18, II)."
+            },
+            {
+                article: "Art. 10",
+                question: "Para ser nomeado Comandante-Geral, o militar deve ser Coronel da ativa de qual quadro e possuir qual curso? (Art. 10)",
+                options: [
+                    "QOPM ou QOA, com CSP ou equivalente.",
+                    "QOPM, com CSP ou equivalente.",
+                    "QOPM, com CAO ou equivalente.",
+                    "Qualquer quadro de Coronel, com CSP.",
+                    "QOPM, com Curso de Habilitação de Oficiais."
+                ],
+                answer: "QOPM, com CSP ou equivalente.",
+                justification: "Art. 10: '...dentre os Coronéis da ativa, diplomados em Curso Superior de Polícia ou equivalente, pertencentes ao Quadro de Oficiais Policiais Militares - QOPM...'"
+            },
+            {
+                article: "Art. 10",
+                question: "Conforme a LC 149/2023, o Comandante-Geral contará com um Assessor-Especial, que terá qual posto/quadro? (Art. 10, P.Ú)",
+                options: [
+                    "Coronel do QOPM, exclusivamente.",
+                    "Tenente-Coronel ou Coronel pertencente ao QOPM.",
+                    "Major ou Tenente-Coronel do QOPM.",
+                    "Coronel de qualquer quadro.",
+                    "Tenente-Coronel do QOA ou QOPM."
+                ],
+                answer: "Tenente-Coronel ou Coronel pertencente ao QOPM.",
+                justification: "Art. 10, Parágrafo único: '...Tenente-Coronel ou Coronel pertencente ao QOPM...'"
+            },
+            {
+                article: "Art. 11",
+                question: "O Chefe do Estado Maior (CHEM) é nomeado por ato de quem e mediante indicação de quem? (Art. 11)",
+                options: [
+                    "Ato do Comandante-Geral, mediante indicação do Governador.",
+                    "Ato do Chefe do Poder Executivo, mediante indicação do Comandante-Geral.",
+                    "Ato do Comandante-Geral, por escolha livre.",
+                    "Ato do Chefe do Poder Executivo, por escolha livre.",
+                    "Ato do Corregedor-Geral, homologado pelo Comandante-Geral."
+                ],
+                answer: "Ato do Chefe do Poder Executivo, mediante indicação do Comandante-Geral.",
+                justification: "Art. 11: '...é nomeado por ato do Chefe do Poder Executivo mediante indicação do Comandante-Geral...'"
+            },
+            {
+                article: "Art. 12",
+                question: "O Chefe do Estado Maior (CHEM), cumulativamente com suas funções, exerce a função de: (Art. 12)",
+                options: [
+                    "Subcomandante-Geral da PMTO.",
+                    "Corregedor-Geral da PMTO.",
+                    "Controlador Interno da PMTO.",
+                    "Chefe da Casa Militar.",
+                    "Assessor-Especial do Governador."
+                ],
+                answer: "Subcomandante-Geral da PMTO.",
+                justification: "Art. 12: '...cumulativamente com a função de Subcomandante-Geral da PMTO.'"
+            },
+            {
+                article: "Art. 13",
+                question: "A quem compete substituir o Chefe do Estado Maior (CHEM) nos afastamentos eventuais e impedimentos legais? (Art. 13, P.Ú)",
+                options: [
+                    "Ao Corregedor-Geral.",
+                    "Ao Subchefe do Estado Maior (SCHEM).",
+                    "Ao Assessor-Especial do Comandante-Geral.",
+                    "Ao Coronel QOPM mais antigo.",
+                    "Ao Chefe do Gabinete do Comandante-Geral."
+                ],
+                answer: "Ao Subchefe do Estado Maior (SCHEM).",
+                justification: "Art. 13, Parágrafo único: 'Compete ao Subchefe do Estado Maior - SCHEM substituir o Chefe do Estado Maior, nos afastamentos eventuais e impedimentos legais...'"
+            },
+            {
+                article: "Art. 14",
+                question: "O Corregedor-Geral é escolhido por quem e tem precedência funcional sobre quem? (Art. 14)",
+                options: [
+                    "Escolhido pelo Governador; tem precedência sobre todos, exceto CG.",
+                    "Escolhido pelo CG; tem precedência sobre os demais, exceto CG e CHEM.",
+                    "Escolhido pelo CG; tem precedência sobre os demais, exceto CG, CHEM e SCHEM.",
+                    "Escolhido pelo Governador; não tem precedência funcional.",
+                    "Escolhido pelo CG; tem precedência apenas sobre as Corregedorias Locais."
+                ],
+                answer: "Escolhido pelo CG; tem precedência sobre os demais, exceto CG, CHEM e SCHEM.",
+                justification: "Art. 14: '...é escolhido pelo Comandante-Geral... e tem precedência funcional sobre os demais Policiais Militares, exceto sobre o Comandante-Geral, o Chefe do Estado Maior e o Subchefe do Estado Maior.'"
+            },
+            {
+                article: "Art. 14",
+                question: "A Corregedoria-Geral (CORREG) é uma unidade administrativa técnica subordinada a quem? (Art. 14, §1º)",
+                options: [
+                    "Ao Chefe do Poder Executivo.",
+                    "Ao Chefe do Estado Maior (CHEM).",
+                    "Ao Comandante-Geral.",
+                    "Ao Subchefe do Estado Maior (SCHEM).",
+                    "À Procuradoria-Geral do Estado."
+                ],
+                answer: "Ao Comandante-Geral.",
+                justification: "Art. 14, §1º: 'A Corregedoria-Geral - CORREG, unidade administrativa técnica subordinada ao Comandante-Geral...'"
+            },
+            {
+                article: "Art. 14",
+                question: "Qual das seguintes NÃO é uma finalidade da Corregedoria-Geral (CORREG)? (Art. 14, §1º)",
+                options: [
+                    "Assegurar a correta aplicação da lei.",
+                    "Padronizar os procedimentos de Polícia Judiciária Militar e processos disciplinares.",
+                    "Realizar correições e fiscalizações.",
+                    "Garantir a preservação dos princípios da hierarquia e disciplina.",
+                    "Planejar a articulação operacional e o policiamento ostensivo."
+                ],
+                answer: "Planejar a articulação operacional e o policiamento ostensivo.",
+                justification: "Esta é uma atribuição da 3ª Seção (PM/3) do EMG (Art. 15, III). As demais são finalidades da CORREG (Art. 14, §1º)."
+            },
+            {
+                article: "Art. 14",
+                question: "As corregedorias locais, existentes nos Batalhões e CIPM, são: (Art. 14, §2º)",
+                options: [
+                    "Subordinadas diretamente à CORREG e vinculadas tecnicamente aos seus comandantes.",
+                    "Subordinadas aos respectivos comandantes e vinculadas tecnicamente à CORREG.",
+                    "Subordinadas e vinculadas tecnicamente apenas à CORREG.",
+                    "Subordinadas e vinculadas tecnicamente apenas aos seus respectivos comandantes.",
+                    "Subordinadas ao CHEM e vinculadas tecnicamente à CORREG."
+                ],
+                answer: "Subordinadas aos respectivos comandantes e vinculadas tecnicamente à CORREG.",
+                justification: "Art. 14, §2º: '...corregedorias locais, subordinadas aos respectivos comandantes e vinculadas tecnicamente à CORREG.'"
+            },
+            {
+                article: "Art. 15",
+                question: "A quem compete a formulação de diretrizes, ordens e normas gerais de ação do Comandante-Geral no acionamento das unidades? (Art. 15)",
+                options: [
+                    "Ao Gabinete do Comandante-Geral (GCG).",
+                    "Ao Estado Maior Geral (EMG).",
+                    "Ao Estado Maior Especial (EME).",
+                    "Ao Chefe do Estado Maior (CHEM).",
+                    "À Ajudância-Geral (AG)."
+                ],
+                answer: "Ao Estado Maior Geral (EMG).",
+                justification: "Art. 15: 'O Estado Maior-Geral é responsável... cabendo-lhe a formulação de diretrizes, ordens e normas gerais de ação do Comandante-Geral...'"
+            },
+            {
+                article: "Art. 15",
+                question: "A qual Seção do EMG compete secretariar a Comissão de Promoção de Oficiais (CPO) e a Comissão de Promoção de Praças (CPP)? (Art. 15, I)",
+                options: [
+                    "1ª Seção (PM/1).",
+                    "3ª Seção (PM/3).",
+                    "5ª Seção (PM/5).",
+                    "6ª Seção (PM/6).",
+                    "À Diretoria de Gestão Profissional (DGP)."
+                ],
+                answer: "1ª Seção (PM/1).",
+                justification: "Art. 15, I: '1ª Seção (PM/1): ...bem como por secretariar a Comissão de Promoção de Oficiais - CPO, a Comissão de Promoção de Praças - CPP...'"
+            },
+            {
+                article: "Art. 15",
+                question: "A Agência Central de Inteligência (ACI), responsável pelo controle de armamento e munição dos integrantes da PMTO, corresponde a qual Seção do EMG? (Art. 15, II)",
+                options: [
+                    "PM/1.",
+                    "PM/2.",
+                    "PM/3.",
+                    "PM/4.",
+                    "PM/7."
+                ],
+                answer: "PM/2.",
+                justification: "Art. 15, II: '2ª Seção (PM/2): denominada Agência Central de Inteligência - ACI, responsável... controle de armamento e munição dos integrantes da PMTO...'"
+            },
+            {
+                article: "Art. 15",
+                question: "Qual Seção do EMG é responsável pelos estudos, doutrina, pesquisas e padronização de procedimentos operacionais? (Art. 15, III)",
+                options: [
+                    "PM/1 (Legislação).",
+                    "PM/3 (Operações).",
+                    "PM/4 (Logística).",
+                    "PM/5 (Comunicação).",
+                    "DEIP (Ensino)."
+                ],
+                answer: "PM/3 (Operações).",
+                justification: "Art. 15, III: '3ª Seção (PM/3): ...e pelos estudos, doutrina e pesquisas relativas à preservação da ordem pública... à padronização de procedimentos operacionais...'"
+            },
+            {
+                article: "Art. 15",
+                question: "A Assessoria de Comunicação (ASCOM), responsável pelo marketing institucional e cerimonial, corresponde a qual Seção do EMG? (Art. 15, V)",
+                options: [
+                    "PM/1.",
+                    "PM/3.",
+                    "PM/5.",
+                    "PM/6.",
+                    "PM/7."
+                ],
+                answer: "PM/5.",
+                justification: "Art. 15, V: '5ª Seção (PM/5): denominada Assessoria de Comunicação - ASCOM, responsável... publicidade... cerimonial, eventos e marketing institucional;'"
+            },
+            {
+                article: "Art. 15",
+                question: "A Assessoria Técnica de Informática e Telecomunicações (ATIT) corresponde a qual Seção do EMG? (Art. 15, VII)",
+                options: [
+                    "PM/2.",
+                    "PM/4.",
+                    "PM/5.",
+                    "PM/6.",
+                    "PM/7."
+                ],
+                answer: "PM/7.",
+                justification: "Art. 15, VII: '7ª Seção (PM/7): denominada Assessoria Técnica de Informática e Telecomunicações - ATIT...'"
+            },
+            {
+                article: "Art. 16",
+                question: "O Estado Maior Especial (EME) é composto por quais tipos de unidades? (Art. 16)",
+                options: [
+                    "Seções (PM/1 a PM/7).",
+                    "Comandos de Policiamento (CPC, CPE, CRPs).",
+                    "Diretorias (DAL, DEIP, DGP, DOF, DSPS, DPS).",
+                    "Assessorias (AJUR, AAL, AMP, etc.).",
+                    "Batalhões e Companhias Independentes."
+                ],
+                answer: "Diretorias (DAL, DEIP, DGP, DOF, DSPS, DPS).",
+                justification: "Art. 16: 'O Estado Maior Especial - EME é composto pelas seguintes Diretorias:' (Lista de I a VI)."
+            },
+            {
+                article: "Art. 16",
+                question: "Qual Diretoria é responsável pela execução das atividades de suprimento e manutenção de material, de obras e de patrimônio? (Art. 16, I)",
+                options: [
+                    "Diretoria de Apoio Logístico (DAL).",
+                    "Diretoria de Orçamento e Finanças (DOF).",
+                    "PM/4.",
+                    "Ajudância-Geral (AG).",
+                    "Diretoria de Gestão Profissional (DGP)."
+                ],
+                answer: "Diretoria de Apoio Logístico (DAL).",
+                justification: "Art. 16, I: 'Diretoria de Apoio Logístico - DAL: responsável pela execução... das matérias relativas às atividades de suprimento e manutenção de material, de obras e de patrimônio;'"
+            },
+            {
+                article: "Art. 16",
+                question: "A Diretoria de Gestão Profissional (DGP) é responsável pela gestão profissional e matérias relacionadas a: (Art. 16, III)",
+                options: [
+                    "Apenas militares da ativa.",
+                    "Apenas Oficiais.",
+                    "Militares e demais servidores civis da Instituição.",
+                    "Apenas Praças e servidores civis.",
+                    "Militares, servidores civis e seus dependentes."
+                ],
+                answer: "Militares e demais servidores civis da Instituição.",
+                justification: "Art. 16, III: '...matérias relacionadas aos militares e demais servidores civis da Instituição...'"
+            },
+            {
+                article: "Art. 16",
+                question: "A Diretoria de Saúde e Promoção Social (DSPS) é responsável, entre outros, por quais órgãos? (Art. 16, V)",
+                options: [
+                    "Junta Militar Central de Saúde (JMCS) e Capelania Militar (CAPMIL).",
+                    "Junta Militar Central de Saúde (JMCS) e Assessoria Jurídica (AJUR).",
+                    "Capelania Militar (CAPMIL) e Corpo Musical.",
+                    "Junta Militar Central de Saúde (JMCS) e PROERD.",
+                    "Capelania Militar (CAPMIL) e Patrulha Maria da Penha (CPMP)."
+                ],
+                answer: "Junta Militar Central de Saúde (JMCS) e Capelania Militar (CAPMIL).",
+                justification: "Art. 16, V: '...pela Junta Militar Central de Saúde - JMCS e Capelania Militar - CAPMIL.'"
+            },
+            {
+                article: "Art. 16",
+                question: "Qual Diretoria, conforme a LC 149/2023, é responsável pela gestão dos CMTO, PROERD, Corpo Musical e Patrulha Maria da Penha? (Art. 16, VI)",
+                options: [
+                    "Diretoria de Ensino, Instrução e Pesquisa (DEIP).",
+                    "Diretoria de Gestão Profissional (DGP).",
+                    "Diretoria de Programas Sociais da PMTO (DPS).",
+                    "Diretoria de Saúde e Promoção Social (DSPS).",
+                    "Assessoria de Comunicação (ASCOM)."
+                ],
+                answer: "Diretoria de Programas Sociais da PMTO (DPS).",
+                justification: "Art. 16, VI (Redação nova): 'Diretoria de Programas Sociais da PMTO - DPS: responsável pela gestão... aos Colégios Militares... PROERD, ao Corpo Musical... Patrulha Maria da Penha...'"
+            },
+            {
+                article: "Art. 16",
+                question: "A Junta Militar Central de Saúde (JMCS) é composta por: (Art. 16, §2º)",
+                options: [
+                    "Apenas por Oficiais do Quadro de Saúde.",
+                    "Apenas por profissionais civis da Junta Médica Oficial do Estado.",
+                    "Oficiais e Praças do Quadro de Saúde e por profissionais civis.",
+                    "Apenas por Oficiais Médicos.",
+                    "Oficiais do QOS e Oficiais do QOAS."
+                ],
+                answer: "Oficiais e Praças do Quadro de Saúde e por profissionais civis.",
+                justification: "Art. 16, §2º: 'A Junta Militar Central de Saúde - JMCS, composta por Oficiais e Praças do Quadro de Saúde e por profissionais civis...'"
+            },
+            {
+                article: "Art. 17",
+                question: "Os Comandos de Policiamento (CP), unidades de direção, são de comando exclusivo de qual posto e quadro? (Art. 17)",
+                options: [
+                    "Coronel da ativa do QOPM.",
+                    "Coronel ou Tenente-Coronel da ativa do QOPM.",
+                    "Coronel da ativa de qualquer quadro.",
+                    "Coronel ou Tenente-Coronel do QOPM ou QOA.",
+                    "Coronel da reserva do QOPM."
+                ],
+                answer: "Coronel da ativa do QOPM.",
+                justification: "Art. 17 (Redação nova): '...unidades de direção, exclusivo de Coronel da ativa do quadro QOPM...'"
+            },
+            {
+                article: "Art. 17",
+                question: "Quais são os Comandos de Policiamento previstos na LOB (com redação da LC 149/2023)? (Art. 17)",
+                options: [
+                    "CPC, CPI e CPE.",
+                    "CPC, CPE, CRP-1, CRP-2 e CRP-3.",
+                    "CPC, CPI, CRP-1 e CRP-2.",
+                    "Comando de Policiamento do Norte e Comando de Policiamento do Sul.",
+                    "CPC, CPE e Comandos Regionais de Policiamento (do 1º ao 7º)."
+                ],
+                answer: "CPC, CPE, CRP-1, CRP-2 e CRP-3.",
+                justification: "Art. 17 (Redação nova): 'I - Comando de Policiamento da Capital - CPC; II - Comando de Policiamento Especializado - CPE; III - Comandos Regionais de Policiamento - CRP: a) ...CRP-1; b) ...CRP-2; e c) ...CRP-3.'"
+            },
+            {
+                article: "Art. 18",
+                question: "Qual das seguintes unidades NÃO é classificada como Unidade Administrativa de Apoio? (Art. 18)",
+                options: [
+                    "Gabinete do Comandante-Geral (GCG).",
+                    "Ajudância-Geral (AG/QCG).",
+                    "Assessoria Jurídica (AJUR).",
+                    "Estado Maior Geral (EMG).",
+                    "Comissão de Promoção de Oficiais (CPO)."
+                ],
+                answer: "Estado Maior Geral (EMG).",
+                justification: "O Art. 18 lista as Unidades de Apoio. O EMG é uma Unidade de Direção (Art. 9, V)."
+            },
+            {
+                article: "Art. 18",
+                question: "A Comissão de Promoção de Praças (CPP) é presidida por quem? (Art. 18, XIV)",
+                options: [
+                    "Pelo Comandante-Geral.",
+                    "Pelo Chefe do Estado Maior.",
+                    "Pelo Subchefe do Estado Maior.",
+                    "Pelo Corregedor-Geral.",
+                    "Pelo Diretor de Gestão Profissional (DGP)."
+                ],
+                answer: "Pelo Chefe do Estado Maior.",
+                justification: "Art. 18, XIV: 'Comissão de Promoção de Praças - CPP, presidida pelo Chefe do Estado Maior...'"
+            },
+            {
+                article: "Art. 18",
+                question: "Qual das seguintes comissões NÃO é presidida pelo Comandante-Geral? (Art. 18)",
+                options: [
+                    "Comissão de Promoção de Oficiais (CPO).",
+                    "Comissão de Promoção de Praças (CPP).",
+                    "Comissão Permanente de Medalhas (CPM).",
+                    "Todas são presididas pelo Comandante-Geral.",
+                    "Nenhuma é presidida pelo Comandante-Geral."
+                ],
+                answer: "Comissão de Promoção de Praças (CPP).",
+                justification: "A CPO (XIII) e a CPM (XV) são presididas pelo CG. A CPP (XIV) é presidida pelo CHEM."
+            },
+            {
+                article: "Art. 19",
+                question: "O Chefe do Gabinete do Comandante-Geral (GCG) é indicado pelo CG e nomeado por quem? (Art. 19)",
+                options: [
+                    "Pelo próprio Comandante-Geral.",
+                    "Pelo Chefe do Estado Maior.",
+                    "Pelo Chefe do Poder Executivo.",
+                    "Pelo Secretário-Chefe da Casa Civil.",
+                    "Pelo Corregedor-Geral."
+                ],
+                answer: "Pelo Chefe do Poder Executivo.",
+                justification: "Art. 19 (Redação nova): '...indicado pelo Comandante-Geral e nomeado pelo Chefe do Poder Executivo...'"
+            },
+            {
+                article: "Art. 20",
+                question: "A Academia Policial Militar Tiradentes (APMT) é vinculada tecnicamente a qual diretoria? (Art. 20)",
+                options: [
+                    "Diretoria de Gestão Profissional (DGP).",
+                    "Diretoria de Ensino, Instrução e Pesquisa (DEIP).",
+                    "Diretoria de Programas Sociais (DPS).",
+                    "Gabinete do Comandante-Geral (GCG).",
+                    "Não possui vinculação técnica."
+                ],
+                answer: "Diretoria de Ensino, Instrução e Pesquisa (DEIP).",
+                justification: "Art. 20: 'A APMT, vinculada tecnicamente à DEIP...'"
+            },
+            {
+                article: "Art. 21",
+                question: "Conforme o Art. 21, quem é o Comandante do Quartel do Comando-Geral (QCG)?",
+                options: [
+                    "O Chefe do Estado Maior (CHEM).",
+                    "O Subchefe do Estado Maior (SCHEM).",
+                    "O Ajudante-Geral.",
+                    "O Chefe do Gabinete do CG.",
+                    "Um Coronel QOPM designado especificamente."
+                ],
+                answer: "O Ajudante-Geral.",
+                justification: "Art. 21, §1º: 'O Ajudante-Geral é o Comandante do Quartel do Comando-Geral - QCG;'"
+            },
+            {
+                article: "Art. 23",
+                question: "As Assessorias (AAL, AMP, ATCE, etc.) são chefiadas por militares de quais postos/quadro? (Art. 23, §2º)",
+                options: [
+                    "Coronéis do QOPM, exclusivamente.",
+                    "Tenentes-Coronéis do QOPM, exclusivamente.",
+                    "Coronéis ou Tenentes-Coronéis do quadro QOPM.",
+                    "Oficiais Superiores de qualquer quadro.",
+                    "Coronéis ou Tenentes-Coronéis do QOPM ou QOA."
+                ],
+                answer: "Coronéis ou Tenentes-Coronéis do quadro QOPM.",
+                justification: "Art. 23, §2º (Redação nova): '...serão chefiadas por Coronéis ou Tenentes-coronéis do quadro QOPM...'"
+            },
+            {
+                article: "Art. 25",
+                question: "As Unidades Policiais Militares (UPM) e Unidades Policiais Militares Especializadas (UPME) são classificadas como unidades administrativas de: (Art. 25)",
+                options: [
+                    "Direção.",
+                    "Apoio.",
+                    "Execução.",
+                    "Especiais.",
+                    "Assessoramento."
+                ],
+                answer: "Execução.",
+                justification: "Art. 25: 'As unidades administrativas de execução... são constituídas pelas Unidades Policiais Militares - UPM e Unidades Policiais Militares Especializadas - UPME...'"
+            },
+            {
+                article: "Art. 27",
+                question: "Conforme a redação dada pela LC 149/2023, os Colégios Militares (CMTO), unidades especiais, subordinam-se a qual Diretoria? (Art. 27, P.Ú)",
+                options: [
+                    "Diretoria de Ensino, Instrução e Pesquisa (DEIP).",
+                    "Diretoria de Gestão Profissional (DGP).",
+                    "Diretoria de Programas Sociais da PMTO (DPS).",
+                    "Diretoria de Saúde e Promoção Social (DSPS).",
+                    "Comando de Policiamento da Capital (CPC)."
+                ],
+                answer: "Diretoria de Programas Sociais da PMTO (DPS).",
+                justification: "Art. 27, Parágrafo único (Redação nova): 'Os Colégios Militares... subordinam-se à Diretoria de Programas Sociais da PMTO - DPS...'"
+            },
+            {
+                article: "Art. 28",
+                question: "Qual dos seguintes Quadros de Oficiais NÃO pode alcançar o Posto de Tenente-Coronel PM? (Art. 28, I, a)",
+                options: [
+                    "Quadro de Oficiais Especialistas (QOE).",
+                    "Quadro de Oficiais de Administração (QOA).",
+                    "Quadro de Oficiais Músicos (QOM).",
+                    "Quadro de Oficiais da Administração da Saúde (QOAS).",
+                    "Quadro de Oficiais Policiais Militares (QOPM)."
+                ],
+                answer: "Quadro de Oficiais Policiais Militares (QOPM).",
+                justification: "O QOPM pode alcançar o Posto de Coronel PM (Art. 28, I, a, 1). Os demais (QOE, QOA, QOM, QOAS) podem alcançar o Posto de Tenente-Coronel PM."
+            },
+            {
+                article: "Art. 28",
+                question: "Qual área de formação superior NÃO está prevista para o Quadro de Oficiais de Saúde (QOS)? (Art. 28, I, a, 2)",
+                options: [
+                    "Medicina.",
+                    "Odontologia.",
+                    "Psicologia.",
+                    "Direito.",
+                    "Medicina Veterinária."
+                ],
+                answer: "Direito.",
+                justification: "O Art. 28, I, a, 2 lista as áreas do QOS. 'Direito' pertence ao Quadro de Oficiais Especialistas (QOE) (Art. 28, I, a, 3)."
+            },
+            {
+                article: "Art. 28",
+                question: "Qual área de formação superior NÃO está prevista para o Quadro de Oficiais Especialistas (QOE)? (Art. 28, I, a, 3)",
+                options: [
+                    "Administração.",
+                    "Direito.",
+                    "Engenharia.",
+                    "Teologia.",
+                    "Enfermagem."
+                ],
+                answer: "Enfermagem.",
+                justification: "O Art. 28, I, a, 3 lista as áreas do QOE. 'Enfermagem' pertence ao Quadro de Oficiais de Saúde (QOS) (Art. 28, I, a, 2)."
+            },
+            {
+                article: "Art. 28",
+                question: "Para ingresso no Quadro de Oficiais de Administração (QOA), o militar deve ser Subtenente e possuir qual curso? (Art. 28, I, a, 4)",
+                options: [
+                    "Curso de Formação de Oficiais (CFO).",
+                    "Curso Superior de Polícia (CSP).",
+                    "Curso de Aperfeiçoamento de Sargentos (CAS).",
+                    "Curso de Formação de Cabos (CFC).",
+                    "Não há exigência de curso, apenas de formação superior."
+                ],
+                answer: "Curso de Aperfeiçoamento de Sargentos (CAS).",
+                justification: "Art. 28, I, a, 4: '...dentre os Subtenentes com Curso de Aperfeiçoamento de Sargentos...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O Quadro de Oficiais Músicos (QOM) é admitido mediante seleção específica dentre os Subtenentes de qual quadro? (Art. 28, I, a, 5)",
+                options: [
+                    "QPPM.",
+                    "QPS.",
+                    "QPE.",
+                    "QOA.",
+                    "Qualquer quadro de Subtenente."
+                ],
+                answer: "QPE.",
+                justification: "Art. 28, I, a, 5: '...dentre os Subtenentes do QPE...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O Quadro de Oficiais da Administração da Saúde (QOAS) é admitido mediante seleção específica dentre os Subtenentes de qual quadro? (Art. 28, I, a, 6)",
+                options: [
+                    "QPPM.",
+                    "QPS.",
+                    "QPE.",
+                    "QOS.",
+                    "Qualquer quadro de Subtenente."
+                ],
+                answer: "QPS.",
+                justification: "Art. 28, I, a, 6: '...dentre os Subtenentes do QPS...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O Quadro de Praças Especiais (QPES) é constituído por: (Art. 28, I, b, 1)",
+                options: [
+                    "Subtenentes e 1º Sargentos.",
+                    "Cabos e Soldados em missões especiais.",
+                    "Aspirantes a Oficiais e Cadetes do CFO.",
+                    "Praças do QPE (Músicos) e QPS (Saúde).",
+                    "Praças com mais de 20 anos de serviço."
+                ],
+                answer: "Aspirantes a Oficiais e Cadetes do CFO.",
+                justification: "Art. 28, I, b, 1: 'Quadro de Praças Especiais - QPES: constituído pelos Aspirantes a Oficiais e Cadetes do Curso de Formação de Oficiais;'"
+            },
+            {
+                article: "Art. 28",
+                question: "As Praças do Quadro de Praças Especialistas (QPE) são admitidas mediante concurso específico na área técnica de: (Art. 28, I, b, 3)",
+                options: [
+                    "Saúde (Enfermagem e Radiologia).",
+                    "Administração e Finanças.",
+                    "Música.",
+                    "Informática e Telecomunicações.",
+                    "Manutenção de Armamento."
+                ],
+                answer: "Música.",
+                justification: "Art. 28, I, b, 3: '...concurso público específico, na área técnica de música...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O pessoal inativo da PMTO é constituído de: (Art. 28, II)",
+                options: [
+                    "Militares da reserva remunerada e agregados.",
+                    "Militares reformados e agregados.",
+                    "Militares da reserva remunerada e reformados.",
+                    "Militares agregados e excedentes.",
+                    "Apenas militares reformados."
+                ],
+                answer: "Militares da reserva remunerada e reformados.",
+                justification: "Art. 28, II: 'o pessoal inativo: a) da reserva remunerada...; b) reformados...'"
+            },
+            {
+                article: "Art. 28",
+                question: "A carreira dos Oficiais do QOS (Saúde) pode alcançar o Posto de Coronel para quais formações? (Art. 28, §2º, I)",
+                options: [
+                    "Apenas Medicina.",
+                    "Medicina e Odontologia.",
+                    "Medicina, Odontologia e Psicologia.",
+                    "Medicina, Odontologia e Enfermagem.",
+                    "Todas as áreas do QOS."
+                ],
+                answer: "Medicina e Odontologia.",
+                justification: "Art. 28, §2º, I: 'Coronel, para os Oficiais admitidos... nas áreas de Medicina e Odontologia;'"
+            },
+            {
+                article: "Art. 28",
+                question: "A carreira dos Oficiais do QOS (Saúde) pode alcançar o Posto de Tenente-Coronel para quais formações? (Art. 28, §2º, II)",
+                options: [
+                    "Apenas Psicologia e Fisioterapia.",
+                    "Para os Oficiais com formação superior nas demais áreas (exceto Medicina e Odontologia).",
+                    "Apenas Enfermagem e Farmácia.",
+                    "Para nenhuma área, o limite é Major.",
+                    "Apenas Medicina Veterinária."
+                ],
+                answer: "Para os Oficiais com formação superior nas demais áreas (exceto Medicina e Odontologia).",
+                justification: "Art. 28, §2º, II: 'Tenente Coronel, para os Oficiais com formação superior nas demais áreas.'"
+            },
+            {
+                article: "Art. 28",
+                question: "A quem compete exercer as atividades técnico-administrativas inerentes à habilitação específica e a assistência religiosa? (Art. 28, §3º, III)",
+                options: [
+                    "QOPM.",
+                    "QOS.",
+                    "QOE (Oficiais Especialistas, incluindo Capelães).",
+                    "QOA.",
+                    "DSPS."
+                ],
+                answer: "QOE (Oficiais Especialistas, incluindo Capelães).",
+                justification: "Art. 28, §3º, III: 'QOE: exercer as atividades técnico-administrativas... e assistência religiosa dos Oficiais Capelães...'"
+            },
+            {
+                article: "Art. 28",
+                question: "A quem compete, sem prejuízo da atividade operacional, exercer as atividades administrativas? (Art. 28, §3º, IV)",
+                options: [
+                    "QOPM.",
+                    "QOS.",
+                    "QOE.",
+                    "QOA.",
+                    "QOM."
+                ],
+                answer: "QOA.",
+                justification: "Art. 28, §3º, IV: 'QOAS [leia-se QOA]: sem prejuízo da atividade operacional, exercer as atividades administrativas...'"
+            },
+            {
+                article: "Art. 30",
+                question: "Quais graduações NÃO ocupam vagas no Quadro de Organização e Distribuição do Efetivo (QOD)? (Art. 30, P.Ú)",
+                options: [
+                    "Aluno-Praça e 3º Sargento.",
+                    "Cadetes e Aluno-Praça.",
+                    "Cadetes e Aspirantes a Oficiais.",
+                    "Aspirantes a Oficiais e Aluno-Praça.",
+                    "Cadetes e 3º Sargento."
+                ],
+                answer: "Cadetes e Aluno-Praça.",
+                justification: "Art. 30, Parágrafo único: 'As graduações de Cadetes e Aluno-Praça não ocupam vagas no QOD.' (Aspirante-a-Oficial é Praça Especial - Art. 28, I, b, 1 - mas o Art. 30, P.Ú. só menciona Cadete e Aluno-Praça)."
+            },
+            {
+                article: "Art. 32",
+                question: "A quem compete, mediante Decreto, a criação, transformação ou extinção de unidades, QUANDO NÃO IMPLICAR AUMENTO DE DESPESA? (Art. 32)",
+                options: [
+                    "Ao Comandante-Geral.",
+                    "Ao Chefe do Estado Maior.",
+                    "Ao Chefe do Poder Executivo.",
+                    "À Assembleia Legislativa, mediante Lei Complementar.",
+                    "Ao Corregedor-Geral."
+                ],
+                answer: "Ao Chefe do Poder Executivo.",
+                justification: "Art. 32: 'Compete ao Chefe do Poder Executivo, mediante Decreto, quando não implicar aumento de despesa, a criação, transformação, extinção...'"
+            },
+            {
+                article: "Art. 34",
+                question: "As funções de Comando e Chefia das unidades administrativas de Direção e de Apoio são exclusivas de quais postos/quadro? (Art. 34)",
+                options: [
+                    "Coronel ou Tenente-Coronel do QOPM.",
+                    "Coronel do QOPM, exclusivamente.",
+                    "Coronel ou Tenente-Coronel de qualquer quadro.",
+                    "Coronel do QOPM ou QOA.",
+                    "Oficiais Superiores do QOPM."
+                ],
+                answer: "Coronel ou Tenente-Coronel do QOPM.",
+                justification: "Art. 34: '...são exclusivas do posto de Coronel ou Tenente-Coronel do QOPM.'"
+            },
+            {
+                article: "Art. 34",
+                question: "A função de comando das unidades administrativas de Execução (Batalhões, Companhias) é exclusiva de quem? (Art. 34, P.Ú)",
+                options: [
+                    "Oficiais do QOPM.",
+                    "Oficiais do QOPM ou QOA.",
+                    "Coronéis ou Tenentes-Coronéis do QOPM.",
+                    "Oficiais Superiores de qualquer quadro.",
+                    "Oficiais do QOPM, QOA ou QOE."
+                ],
+                answer: "Oficiais do QOPM.",
+                justification: "Art. 34, Parágrafo único: 'A função de comando das unidades administrativas de Execução é exclusiva dos Oficiais do QOPM.'"
+            },
+            {
+                article: "Art. 35",
+                question: "Os Policiais Militares lotados ou em efetivo exercício na Casa Militar (CAMIL) desempenham função de qual natureza? (Art. 35, P.Ú)",
+                options: [
+                    "Função de natureza civil.",
+                    "Função de natureza militar.",
+                    "Função de natureza mista (civil e militar).",
+                    "Função de natureza política.",
+                    "Função de natureza especial, regida pelo Exército."
+                ],
+                answer: "Função de natureza militar.",
+                justification: "Art. 35, Parágrafo único: '...desempenham função de natureza militar.'"
+            },
+            {
+                article: "Art. 36",
+                question: "Quais são os meios de comunicação OFICIAIS da PMTO (âmbito Corporação)? (Art. 36)",
+                options: [
+                    "Boletim Geral e Boletim Interno.",
+                    "Boletim Geral e Boletim Reservado.",
+                    "Boletim Interno e Boletim Interno Reservado.",
+                    "Boletim Geral e Diário Oficial do Estado.",
+                    "Boletim Reservado e Boletim Interno."
+                ],
+                answer: "Boletim Geral e Boletim Reservado.",
+                justification: "Art. 36: 'Os meios de comunicação oficiais da PMTO são o Boletim Geral e o Boletim Reservado.'"
+            },
+            {
+                article: "Art. 36",
+                question: "Quais são os meios de comunicação oficial NO ÂMBITO DAS UNIDADES da PMTO? (Art. 36, P.Ú)",
+                options: [
+                    "Boletim Geral e Boletim Interno.",
+                    "Boletim Geral e Boletim Reservado.",
+                    "Boletim Interno e Boletim Interno Reservado.",
+                    "Apenas o Boletim Interno.",
+                    "Apenas o Boletim Geral."
+                ],
+                answer: "Boletim Interno e Boletim Interno Reservado.",
+                justification: "Art. 36, Parágrafo único: 'No âmbito das Unidades da PMTO, são meios de comunicação oficial o Boletim Interno e o Boletim Interno Reservado.'"
+            },
+            {
+                article: "Art. 37",
+                question: "O requisito de formação superior para ingresso nos quadros QOA, QOM e QOAS será exigido a partir de qual ano? (Art. 37)",
+                options: [
+                    "2021 (data da lei).",
+                    "2023.",
+                    "2024.",
+                    "2025.",
+                    "2026."
+                ],
+                answer: "2026.",
+                justification: "Art. 37: '...será exigido a partir do ano de 2026.'"
+            },
+            {
+                article: "Art. 39",
+                question: "A Lei Complementar nº 128/2021 revogou qual norma anterior que tratava da Organização Básica? (Art. 39)",
+                options: [
+                    "A Lei Complementar 79, de 27 de abril de 2012.",
+                    "O Estatuto dos Militares (Lei 2.578/2012).",
+                    "O RDMETO (Decreto 4.994/2014).",
+                    "A Lei de Promoção de Praças.",
+                    "A Lei Complementar 55/2009."
+                ],
+                answer: "A Lei Complementar 79, de 27 de abril de 2012.",
+                justification: "Art. 39: 'Revoga-se a Lei Complementar 79, de 27 de abril de 2012.'"
+            }
+        ];
+
+        // Adicionar mais 19 questões para fechar 100
+        const additionalQuestions = [
+            {
+                article: "Art. 1",
+                question: "A PMTO, conforme o Art. 1º, é força auxiliar e reserva de qual instituição?",
+                options: [
+                    "Da Marinha do Brasil.",
+                    "Da Força Aérea Brasileira.",
+                    "Do Exército.",
+                    "Da Força Nacional de Segurança Pública.",
+                    "Não é reserva de nenhuma instituição, apenas força auxiliar."
+                ],
+                answer: "Do Exército.",
+                justification: "Art. 1º: '...força auxiliar e reserva do Exército...'"
+            },
+            {
+                article: "Art. 2",
+                question: "A competência para executar, com exclusividade, o policiamento ostensivo fardado, ressalva as missões peculiares de quem? (Art. 2, II)",
+                options: [
+                    "Das Forças Armadas.",
+                    "Da Polícia Civil.",
+                    "Da Polícia Federal.",
+                    "Da Guarda Metropolitana.",
+                    "Da Polícia Penal."
+                ],
+                answer: "Das Forças Armadas.",
+                justification: "Art. 2º, II: '...ressalvadas as missões peculiares às Forças Armadas...'"
+            },
+            {
+                article: "Art. 2",
+                question: "O policiamento ostensivo e a fiscalização de trânsito nas rodovias estaduais é competência da PMTO? (Art. 2, IV)",
+                options: [
+                    "Não, é competência exclusiva do DETRAN.",
+                    "Não, é competência do Batalhão de Polícia Rodoviária Federal.",
+                    "Sim, a PMTO exerce essa competência.",
+                    "Não, a competência é da Guarda Metropolitana.",
+                    "Sim, mas apenas em convênio com o DETRAN."
+                ],
+                answer: "Sim, a PMTO exerce essa competência.",
+                justification: "Art. 2º, IV: 'exercer o policiamento ostensivo e a fiscalização de trânsito nas rodovias estaduais...'"
+            },
+            {
+                article: "Art. 5",
+                question: "As unidades administrativas que realizam o comando, o planejamento e a administração da Corporação são as de: (Art. 5º)",
+                options: [
+                    "Apoio.",
+                    "Execução.",
+                    "Especiais.",
+                    "Direção.",
+                    "Comando-Geral."
+                ],
+                answer: "Direção.",
+                justification: "Art. 5º: 'As unidades administrativas de direção realizam o comando, o planejamento e a administração da Corporação.'"
+            },
+            {
+                article: "Art. 12",
+                question: "Quem substitui o Comandante-Geral em seus impedimentos legais e eventuais? (Art. 12, P.Ú)",
+                options: [
+                    "O Chefe do Estado Maior (CHEM).",
+                    "O Subchefe do Estado Maior (SCHEM).",
+                    "O Corregedor-Geral.",
+                    "O Coronel QOPM mais antigo.",
+                    "O Chefe do Gabinete do CG."
+                ],
+                answer: "O Chefe do Estado Maior (CHEM).",
+                justification: "Art. 12, Parágrafo único: 'O CHEM substitui o Comandante-Geral em seus impedimentos legais e eventuais.'"
+            },
+            {
+                article: "Art. 15",
+                question: "Qual Seção do EMG é responsável pelo planejamento e execução das matérias relativas a informática, telecomunicações e tecnologia da informação? (Art. 15, VII)",
+                options: [
+                    "PM/1.",
+                    "PM/2.",
+                    "PM/4.",
+                    "PM/6.",
+                    "PM/7 (ATIT)."
+                ],
+                answer: "PM/7 (ATIT).",
+                justification: "Art. 15, VII: '7ª Seção (PM/7): denominada Assessoria Técnica de Informática e Telecomunicações - ATIT, responsável... a informática, telecomunicações e tecnologia da informação.'"
+            },
+            {
+                article: "Art. 16",
+                question: "A Diretoria de Ensino, Instrução e Pesquisa (DEIP) é responsável pelo planejamento, coordenação, fiscalização... (Art. 16, II)",
+                options: [
+                    "Apenas da APMT.",
+                    "Apenas dos Colégios Militares (CMTO).",
+                    "Da APMT e dos Colégios Militares (CMTO).",
+                    "Da APMT e do PROERD.",
+                    "Apenas dos cursos de formação."
+                ],
+                answer: "Da APMT e dos Colégios Militares (CMTO).",
+                justification: "Art. 16, II: '...bem como da Academia Policial Militar Tiradentes - APMT e dos Colégios Militares do Estado Tocantins - CMTO;'"
+            },
+            {
+                article: "Art. 16",
+                question: "A Diretoria de Gestão Profissional (DGP) é responsável pela identificação e expedição de qual documento? (Art. 16, III)",
+                options: [
+                    "Da Carteira Nacional de Habilitação (CNH) dos militares.",
+                    "Dos certificados de cursos.",
+                    "Da identidade funcional dos Policiais Militares.",
+                    "Dos passaportes oficiais.",
+                    "Das autorizações de porte de arma."
+                ],
+                answer: "Da identidade funcional dos Policiais Militares.",
+                justification: "Art. 16, III: '...e a identificação e expedição da identidade funcional dos Policiais Militares;'"
+            },
+            {
+                article: "Art. 16",
+                question: "A quem o Comandante-Geral poderá propor a criação de programas sociais? (Art. 16, §1º - Redação nova)",
+                options: [
+                    "Ao Chefe do Poder Executivo.",
+                    "Ao Chefe do Estado Maior.",
+                    "À Assembleia Legislativa.",
+                    "Ao Secretário de Educação.",
+                    "Ao Diretor da DPS."
+                ],
+                answer: "Ao Chefe do Poder Executivo.",
+                justification: "Art. 16, §1º (Redação nova): 'O Comandante Geral poderá propor ao Chefe do Poder Executivo a criação de programas sociais.'"
+            },
+            {
+                article: "Art. 18",
+                question: "A Comissão Permanente de Medalhas (CPM) é uma unidade de Apoio presidida por quem? (Art. 18, XV)",
+                options: [
+                    "Pelo Chefe do Estado Maior.",
+                    "Pelo Chefe do Gabinete do CG.",
+                    "Pelo Comandante-Geral.",
+                    "Pelo Ajudante-Geral.",
+                    "Pelo Coronel mais antigo."
+                ],
+                answer: "Pelo Comandante-Geral.",
+                justification: "Art. 18, XV: 'Comissão Permanente de Medalhas - CPM, presidida pelo Comandante-Geral...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O Quadro de Oficiais de Saúde (QOS) é constituído de Oficiais de formação superior admitidos mediante: (Art. 28, I, a, 2)",
+                options: [
+                    "Concurso público específico.",
+                    "Seleção interna entre Praças.",
+                    "Indicação do Comandante-Geral.",
+                    "Transferência de outros órgãos.",
+                    "Curso de Habilitação de Oficiais."
+                ],
+                answer: "Concurso público específico.",
+                justification: "Art. 28, I, a, 2: '...admitidos mediante concurso público específico, nas áreas de...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O Quadro de Oficiais de Administração (QOA) é constituído de Oficiais admitidos mediante: (Art. 28, I, a, 4)",
+                options: [
+                    "Concurso público específico.",
+                    "Seleção específica, dentre os Subtenentes com CAS.",
+                    "Indicação do Comandante-Geral.",
+                    "Concurso público, possuidores de formação superior em Administração.",
+                    "Seleção específica, dentre os 1º Sargentos com CAS."
+                ],
+                answer: "Seleção específica, dentre os Subtenentes com CAS.",
+                justification: "Art. 28, I, a, 4: '...admitidos mediante seleção específica, dentre os Subtenentes com Curso de Aperfeiçoamento de sargentos...'"
+            },
+            {
+                article: "Art. 28",
+                question: "Qual é o único Quadro de Oficiais que pode alcançar o Posto de Coronel PM, além do QOPM? (Art. 28, §2º, I)",
+                options: [
+                    "QOA.",
+                    "QOE.",
+                    "QOM.",
+                    "QOAS.",
+                    "QOS (Medicina e Odontologia)."
+                ],
+                answer: "QOS (Medicina e Odontologia).",
+                justification: "Art. 28, §2º, I: 'Coronel, para os Oficiais admitidos mediante concurso na formação superior nas áreas de Medicina e Odontologia;'"
+            },
+            {
+                article: "Art. 28",
+                question: "As Praças do Quadro de Praças Policiais Militares (QPPM) são admitidas para ingresso em qual Graduação? (Art. 28, I, b, 2)",
+                options: [
+                    "Soldado 2ª Classe.",
+                    "Aluno-Soldado.",
+                    "Cadete.",
+                    "Aluno-Praça.",
+                    "Soldado."
+                ],
+                answer: "Aluno-Praça.",
+                justification: "Art. 28, I, b, 2: '...para ingresso na Graduação de Aluno-Praça...'"
+            },
+            {
+                article: "Art. 28",
+                question: "Compete às Praças do QPE executar atividades: (Art. 28, §4º, II)",
+                options: [
+                    "Operacionais.",
+                    "Na área de saúde.",
+                    "Na área de música.",
+                    "Administrativas.",
+                    "De guarda de presídios."
+                ],
+                answer: "Na área de música.",
+                justification: "Art. 28, §4º, II: 'QPE: executar atividades na área de música...'"
+            },
+            {
+                article: "Art. 28",
+                question: "Compete às Praças do QPS executar atividades: (Art. 28, §4º, III)",
+                options: [
+                    "Operacionais.",
+                    "Na área de saúde.",
+                    "Na área de música.",
+                    "Administrativas.",
+                    "De inteligência."
+                ],
+                answer: "Na área de saúde.",
+                justification: "Art. 28, §4º, III: 'QPS: executar atividades na área de saúde...'"
+            },
+            {
+                article: "Art. 28",
+                question: "O pessoal inativo da 'reserva remunerada' é constituído de: (Art. 28, II, a)",
+                options: [
+                    "Oficiais e Praças transferidos para a reserva remunerada.",
+                    "Apenas Oficiais transferidos para a reserva.",
+                    "Apenas Praças transferidos para a reserva.",
+                    "Militares que atingiram a idade limite, mas não foram reformados.",
+                    "Militares agregados."
+                ],
+                answer: "Oficiais e Praças transferidos para a reserva remunerada.",
+                justification: "Art. 28, II, a: 'da reserva remunerada: constituído de Oficiais e Praças transferidos para a reserva remunerada;'"
+            },
+            {
+                article: "Art. 32",
+                question: "A criação de unidades por Decreto do Chefe do Poder Executivo, conforme o Art. 32, exige que:",
+                options: [
+                    "Implique aumento de despesa.",
+                    "Não implique aumento de despesa.",
+                    "Seja aprovada previamente pela Assembleia Legislativa.",
+                    "Seja homologada pelo Corregedor-Geral.",
+                    "Ocorra apenas em anos pares."
+                ],
+                answer: "Não implique aumento de despesa.",
+                justification: "Art. 32: 'Compete ao Chefe do Poder Executivo, mediante Decreto, quando não implicar aumento de despesa...'"
+            },
+            {
+                article: "Art. 34",
+                question: "A função de Comando das unidades de Apoio (ex: APMT, GCG) é exclusiva de quais postos/quadro? (Art. 34)",
+                options: [
+                    "Coronel ou Tenente-Coronel do QOPM.",
+                    "Coronel do QOPM, exclusivamente.",
+                    "Oficiais Superiores de qualquer quadro.",
+                    "Coronel ou Tenente-Coronel do QOPM ou QOA.",
+                    "Oficiais do QOPM."
+                ],
+                answer: "Coronel ou Tenente-Coronel do QOPM.",
+                justification: "Art. 34: 'As funções de Comando e Chefia das unidades administrativas de Direção e de Apoio são exclusivas do posto de Coronel ou Tenente-Coronel do QOPM.'"
+            }
+        ];
+        
+        // Adiciona as questões adicionais ao array principal
+        questions.push(...additionalQuestions);
+
+
+        // Lógica do Quiz
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+        const questionText = document.getElementById('question-text');
+        const progressText = document.getElementById('progress-text');
+        const optionsContainer = document.getElementById('options-container');
+        const feedbackContainer = document.getElementById('feedback-container');
+        const feedbackTitle = document.getElementById('feedback-title');
+        const feedbackJustification = document.getElementById('feedback-justification');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const scoreText = document.getElementById('score-text');
+        const finalScore = document.getElementById('final-score');
+        const finalPercentage = document.getElementById('final-percentage');
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let shuffledQuestions = [];
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            // Embaralha as questões para cada nova tentativa
+            shuffledQuestions = questions.sort(() => Math.random() - 0.5);
+            // Limita a 100 questões (conforme solicitado)
+            shuffledQuestions = shuffledQuestions.slice(0, 100); 
+            
+            resultsContainer.classList.add('hidden');
+            quizContainer.classList.remove('hidden');
+            scoreText.textContent = `Acertos: 0`;
+            progressText.textContent = `Questão 1 de ${shuffledQuestions.length}`;
+            finalScore.textContent = `0 / ${shuffledQuestions.length}`;
+            showQuestion(shuffledQuestions[currentQuestionIndex]);
+        }
+
+        function showQuestion(question) {
+            // Limpa estado anterior
+            feedbackContainer.classList.add('hidden');
+            nextBtn.classList.add('hidden');
+            optionsContainer.classList.remove('disabled-options');
+            optionsContainer.innerHTML = '';
+
+            // Define o texto da questão e progresso
+            questionText.innerHTML = `(${question.article}) ${question.question}`;
+            progressText.textContent = `Questão ${currentQuestionIndex + 1} de ${shuffledQuestions.length}`;
+
+            // Cria os botões de opção
+            question.options.forEach(optionText => {
+                const button = document.createElement('button');
+                button.textContent = optionText;
+                button.className = 'option-btn w-full text-left p-4 rounded-lg border-2 border-gray-200 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-300';
+                button.onclick = () => selectAnswer(button, optionText, question.answer, question.justification);
+                optionsContainer.appendChild(button);
+            });
+        }
+
+        function selectAnswer(selectedButton, selectedText, correctAnswerText, justification) {
+            optionsContainer.classList.add('disabled-options'); // Desabilita cliques futuros
+            nextBtn.classList.remove('hidden');
+
+            const isCorrect = selectedText === correctAnswerText;
+
+            if (isCorrect) {
+                score++;
+                selectedButton.classList.add('correct');
+                feedbackTitle.textContent = "Resposta Correta!";
+                feedbackTitle.className = "text-lg font-semibold text-green-600";
+            } else {
+                selectedButton.classList.add('incorrect');
+                feedbackTitle.textContent = "Resposta Incorreta";
+                feedbackTitle.className = "text-lg font-semibold text-red-600";
+                
+                // Mostra a correta
+                const allButtons = optionsContainer.querySelectorAll('.option-btn');
+                allButtons.forEach(btn => {
+                    if (btn.textContent === correctAnswerText) {
+                        btn.classList.add('correct');
+                    }
+                });
+            }
+
+            // Mostra a justificativa
+            feedbackJustification.innerHTML = `<strong>Justificativa:</strong> ${justification}`;
+            feedbackContainer.classList.remove('hidden');
+            scoreText.textContent = `Acertos: ${score}`;
+        }
+
+        function showNextQuestion() {
+            currentQuestionIndex++;
+            if (currentQuestionIndex < shuffledQuestions.length) {
+                showQuestion(shuffledQuestions[currentQuestionIndex]);
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            
+            const percentage = ((score / shuffledQuestions.length) * 100).toFixed(0);
+            finalScore.textContent = `${score} / ${shuffledQuestions.length}`;
+            finalPercentage.textContent = `Você acertou ${percentage}%`;
+
+            if (percentage >= 70) {
+                finalPercentage.classList.add('text-green-600');
+                finalPercentage.classList.remove('text-red-600');
+            } else {
+                finalPercentage.classList.add('text-red-600');
+                finalPercentage.classList.remove('text-green-600');
+            }
+        }
+
+        nextBtn.addEventListener('click', showNextQuestion);
+        restartBtn.addEventListener('click', startQuiz);
+
+        // Inicia o quiz
+        startQuiz();
+    </script>
+</body>
+</html>
